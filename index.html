@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Click Me</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; width: 100%; overflow: hidden; background: #000; cursor: pointer; }
+  #flash { position: fixed; inset: 0; background: #000; }
+  #overlay {
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    background: #060606; color: #eee; z-index: 10; padding: 30px;
+  }
+  .warn { color: #ffcc00; font-size: 17px; max-width: 500px; margin: 20px 0; }
+</style>
+</head>
+<body>
+  <div id="flash"></div>
+
+  <div id="overlay">
+    <h1 style="font-size:60px; letter-spacing:4px;">CLICK TO START</h1>
+    <p class="warn">⚠ Many windows will spawn and open more windows</p>
+    <p style="color:#888;">Click the black area</p>
+  </div>
+
+<script>
+  let running = false;
+  let windows = [];
+  let soundTimer = null;
+
+  function randomColor() {
+    return `hsl(${Math.floor(Math.random() * 360)}, 100%, 50%)`;
+  }
+
+  function startMainFlash() {
+    const flash = document.getElementById('flash');
+    setInterval(() => flash.style.background = randomColor(), 12);
+  }
+
+  function playLoudRise() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.value = 90;
+      gain.gain.value = 0.85;
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      osc.frequency.linearRampToValueAtTime(1600, ctx.currentTime + 0.9);
+      setTimeout(() => gain.gain.linearRampToValueAtTime(0.02, ctx.currentTime + 0.7), 950);
+    } catch(e) {}
+  }
+
+  function createCrazyWindow() {
+    try {
+      const win = window.open('payload.html', '_blank', 'width=360,height=260');
+      if (win) windows.push(win);
+    } catch(e) {}
+  }
+
+  document.addEventListener('click', function start() {
+    if (running) return;
+    running = true;
+    document.getElementById('overlay').style.display = 'none';
+
+    startMainFlash();
+    playLoudRise();
+    soundTimer = setInterval(playLoudRise, 1950);
+
+    // Initial burst
+    for (let i = 0; i < 5; i++) {
+      setTimeout(createCrazyWindow, i * 200);
+    }
+
+    // Keep spawning from main
+    setInterval(createCrazyWindow, 1800);
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === "Escape" && soundTimer) clearInterval(soundTimer);
+  });
+</script>
+</body>
+</html>
